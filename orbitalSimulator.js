@@ -11,7 +11,7 @@ const skipTimeSteps = Math.floor(100000 / DT);
 const SECONDS_IN_YEAR = 31536000;
 const SECONDS_IN_DAY = 86400;
 let steps = 0;
-const initialGene = [13378362.439431986, 6.05018380038779, 101.00767905472864, 8092651.354162561, 30.91873103790941, 72.50543478615165, 5725941.408551039, 77.33172169642037, 32.47381731126398, 117943.88746673745, -17.967965009819224, 75.8383692416645, 9618111.20650285, 15.32122385567928, 83.54102867954637];
+const initialGene = [926471.3602910098, -65.20376195980275, 8221.084807031397, 184969.7694903934, 99.80181211884306, 916.8898946100408, 3006102.9182290058, -72.81536587936091, 1101.3153103070297, 1259240.1672957188, -68.91678098809862, 4786.691893607488, 2879398.7102472447, 95.72485877458516, 6100.7530760884665];
 const gene = initialGene;
 
 const getThrustProgram = (gene) => {
@@ -24,11 +24,11 @@ let vox = 0;
 let voy = 0;
 // Create celestial bodies
 const sun = { x: 0, y: 0, vx: 0, vy: 0, mass: 1.989e30, color: 'yellow', thrust: 0 };
-const earth = { x: AU, y: 0, vx: 0, vy: 29783, mass: 5.972e24, color: 'blue' };
+const earth = { name: 'earth', x: AU, y: 0, vx: 0, vy: 29783, mass: 5.972e24, color: 'blue' };
+const venus = { name: 'venus', x: 0.723 * AU, y: 0, vx: 0, vy: 35020, mass: 4.87e24, color: 'green', thrust: 0 };
+const mars = { name: 'mars', x: 1.524 * AU, y: 0, vx: 0, vy: 24130, mass: 1, color: 'red', thrust: 0 };
 const something = { x: -  AU, y: 0, vx: 0, vy: -30000, mass: 1e6, color: 'white', thrust: 30, thrustProgram: thrustProgram, thrusting: false };
 //const something2 = { x: 2.524 * AU, y: 0, vx: 0, vy: 19130, mass: 1e6, color: 'white', thrust: 20 };
-const venus = { x: 0.723 * AU, y: 0, vx: 0, vy: 35020, mass: 4.87e24, color: 'green', thrust: 0 };
-const mars = { x: 1.524 * AU, y: 0, vx: 0, vy: 24130, mass: 6.39e23, color: 'red', thrust: 0 };
 const jupiter = { x: 5.203 * AU, y: 0, vx: 0, vy: 13070, mass: 1.898e27, color: 'orange', thrust: 0 };
 let bodies = [something, sun, mars];
 
@@ -37,11 +37,10 @@ const objectiveFunction = (body) => {
     return Math.abs(v - 24130);
 }
 // Update position based on velocity
-const updatePosition = (body) => ({
-    ...body,
-    x: body.x + body.vx * DT,
-    y: body.y + body.vy * DT,
-});
+const updatePosition = (body) => {
+    body.x = body.x + body.vx * DT;
+    body.y = body.y + body.vy * DT;
+};
 
 //Take x and y and return the angle
 const angle = (x, y) => {
@@ -54,17 +53,31 @@ const applyGravity = (body, other) => {
     const dy = other.y - body.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
 
-    const force = G * body.mass * other.mass / (distance * distance);
+    let force = G * body.mass * other.mass / (distance * distance);
+    if (other.mass < 1) {
+        force = 0;
+    }
+
+    // Don't let the sun move, errors add up too quickly with its mass
+    const ax = force * dx / distance / body.mass;
+    const ay = force * dy / distance / body.mass;
+
+
+    body.vx = body.vx + ax * DT;
+    body.vy = body.vy + ay * DT;
+
+};
+
+const applyThust = (body, steps, timeStep) => {
+    // Calculate thrust
     let thax = 0;
     let thay = 0;
-    let timeTotal = 0;
     body.thrusting = false;
     body.thrust = 0;
-    body.thustAngle = 0;
     if (body.thrustProgram) {
-        const seconds = steps * DT;
+        const seconds = steps * timeStep;
         let thrustP;
-
+        let timeTotal = 0;
         for (let i = 0; i < body.thrustProgram.length; i++) {
             timeTotal = timeTotal + body.thrustProgram[i][0];
             if (timeTotal > seconds) {
@@ -73,33 +86,25 @@ const applyGravity = (body, other) => {
             }
         }
         if (thrustP) {
-
             const thrustDirection = thrustP[1];
             const thrust = thrustP[2];
+            const instDirection = Math.atan2(body.vy, body.vx);
+            const thrustDirectionRad = instDirection + thrustDirection * Math.PI / 180;
             if (thrust > 0) {
                 body.thrusting = true;
                 body.thrust = thrust;
                 body.thrustAngle = thrustDirection;
             }
-            const instDirection = Math.atan2(body.vy, body.vx);
-            const thrustDirectionRad = instDirection + thrustDirection * Math.PI / 180;
-
             const thrustX = thrust * Math.cos(thrustDirectionRad);
             const thrustY = thrust * Math.sin(thrustDirectionRad);
             thax = thrustX / body.mass;
             thay = thrustY / body.mass;
+            body.vx = body.vx + thax * timeStep;
+            body.vy = body.vy + thay * timeStep;
         }
+
     }
-    // Don't let the sun move, errors add up too quickly with its mass
-    const ax = force * (body.mass === sun.mass ? 0 : 1) * dx / distance / body.mass + thax;
-    const ay = force * (body.mass === sun.mass ? 0 : 1) * dy / distance / body.mass + thay;
 
-    return {
-        ...body,
-        vx: body.vx + ax * DT,
-        vy: body.vy + ay * DT,
-
-    };
 };
 
 // Draw the body on the canvas
@@ -114,8 +119,8 @@ const drawBody = (body) => {
         const instDirection = Math.atan2(body.vy, body.vx);
         const thrustDirectionRad = instDirection + body.thrustAngle * Math.PI / 180;
         ctx.lineTo(
-            body.x * SCALE + canvas.width / 2 + 100 * body.thrust / 200 * Math.cos(thrustDirectionRad),
-            body.y * SCALE + canvas.height / 2 + 100 * body.thrust / 200 * Math.sin(thrustDirectionRad)
+            body.x * SCALE + canvas.width / 2 + 100 * body.thrust / 20000 * Math.cos(thrustDirectionRad),
+            body.y * SCALE + canvas.height / 2 + 100 * body.thrust / 20000 * Math.sin(thrustDirectionRad)
         );
         ctx.stroke();  // Actually draw the line
         ctx.arc(body.x * SCALE + canvas.width / 2, body.y * SCALE + canvas.height / 2, 1, 0, 2 * Math.PI);
@@ -135,18 +140,26 @@ const simulate = () => {
     // ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // Update positions and apply gravitational forces
-    const updateBodies = () => bodies.map(body =>
-        bodies.reduce((updatedBody, otherBody) => {
-            if (body !== otherBody) {
-                return applyGravity(updatedBody, otherBody);
-            }
-            return updatedBody;
-        }, body)
-    ).map(updatePosition);
+    function updateBodies(steps) {
+        for (let body of bodies) {
+            for (let otherBody of bodies) {
+                if (body !== otherBody && body.name !== 'sun') {
+                    applyGravity(body, otherBody);
+                }
+            };
+            applyThust(body, steps, DT);
+        }
+        for (let body of bodies) {
+            updatePosition(body);
+        }
+
+
+    }
+
 
     for (let i = 0; i < skipTimeSteps; i++) {
         steps++;
-        bodies = updateBodies();
+        updateBodies(steps);
     }
 
     // Draw the bodies

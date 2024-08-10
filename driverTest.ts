@@ -1,6 +1,6 @@
 import { CelestialBody, simulate } from "./orbital";
 
-const MAX_THRUST = 200;
+const MAX_THRUST = 100000;
 // Constants
 const AU = 1.496e11; // Astronomical Unit in meters
 const SECONDS_IN_YEAR = 31536000;
@@ -28,7 +28,7 @@ const randomizeGene = (gene: Gene, amount: number) => {
             return (g + change) % 360;
         } else if ((i % 3) == 2) {
             // return MAX_THRUST;
-            let change = Math.random() * amount - amount / 2;
+            let change = Math.random() * MAX_THRUST / 400 * amount - MAX_THRUST / 400 * amount / 2;
             return g + change > MAX_THRUST ? MAX_THRUST : g + change < 0 ? 0 : g + change;
         }
     });
@@ -64,21 +64,22 @@ const objectiveFunction = (body: CelestialBody, gene: Gene) => {
     let totalBoost = 0;
     let totalProgram = 0
     //Every other third position is a boost
-    for (let i = 0; i < gene.length - 3; i = i + 3) {
+    for (let i = 0; i < gene.length; i = i + 3) {
         //  console.log(`Gene ${i}: ${gene[i]}, ${gene[i + 1]}, ${gene[i + 2]}`);
         totalBoost = totalBoost + gene[i] * gene[i + 2];
         totalProgram = totalProgram + gene[i];
     }
-    //console.log(` totalBoost: ${totalBoost}, totalProgram: ${totalProgram}`);
+    //console.log(` totalBoost: ${totalBoost / SECONDS_IN_YEAR}, totalProgram: ${totalProgram}`);
 
     const avg = total / lastYearsDistance.length;
     const minDistance = Math.abs(min - 1.524 * AU) / (1.524 * AU);
     const maxDistance = Math.abs(max - 1.524 * AU) / (1.524 * AU);
-    const MAX_NEWTON_SECONDS = 100 * SECONDS_IN_YEAR
+    const MAX_NEWTON_SECONDS = 1000000 * SECONDS_IN_YEAR;
     const boostDistance = totalBoost > MAX_NEWTON_SECONDS ? (totalBoost - MAX_NEWTON_SECONDS) / (MAX_NEWTON_SECONDS) : 0;
-    const programDistance = totalProgram > SECONDS_IN_YEAR * 2 ? (totalProgram - SECONDS_IN_YEAR * 2) / (SECONDS_IN_YEAR * 2) : 0;
+    const programDistance = totalProgram > SECONDS_IN_YEAR * 10 ? (totalProgram - SECONDS_IN_YEAR * 10) / (SECONDS_IN_YEAR * 10) : 0;
+    //console.log(`programDistance: ${totalProgram / SECONDS_IN_YEAR}`);
     // console.log(`minDistance: ${minDistance}, maxDistance: ${maxDistance}`);
-    return Math.sqrt(minDistance * minDistance + maxDistance * maxDistance + boostDistance * boostDistance * programDistance * programDistance);
+    return Math.sqrt(minDistance * minDistance + maxDistance * maxDistance + boostDistance * boostDistance + programDistance * programDistance);
     // const v = Math.sqrt(body.vx * body.vx + body.vy * body.vy);
     // return Math.abs(v - 24130);
 }
@@ -188,8 +189,8 @@ for (let i = 0; i < 200; i++) {
     for (let gene of genes) {
         const thrustProgram = getThrustProgram(gene);
         const ship = { name: 'ship', x: -  AU, y: 0, vx: 0, vy: -30000, mass: 1e6, color: 'white', thrust: 0, thrustProgram };
-        let bodies = [{ ...sun }, ship, { ...mars },];
-        simulate(5 * SECONDS_IN_YEAR, bodies, 3600);
+        let bodies = [ship, { ...sun }, { ...mars }];
+        simulate(1.5 * SECONDS_IN_YEAR, bodies, 3600);
         results.push({ gene, distance: objectiveFunction(ship, gene) });
     }
     genes = breed(results);

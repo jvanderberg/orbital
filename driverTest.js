@@ -12,7 +12,7 @@ var __assign = (this && this.__assign) || function () {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var orbital_1 = require("./orbital");
-var MAX_THRUST = 200;
+var MAX_THRUST = 100000;
 // Constants
 var AU = 1.496e11; // Astronomical Unit in meters
 var SECONDS_IN_YEAR = 31536000;
@@ -37,7 +37,7 @@ var randomizeGene = function (gene, amount) {
         }
         else if ((i % 3) == 2) {
             // return MAX_THRUST;
-            var change = Math.random() * amount - amount / 2;
+            var change = Math.random() * MAX_THRUST / 400 * amount - MAX_THRUST / 400 * amount / 2;
             return g + change > MAX_THRUST ? MAX_THRUST : g + change < 0 ? 0 : g + change;
         }
     });
@@ -67,20 +67,21 @@ var objectiveFunction = function (body, gene) {
     var totalBoost = 0;
     var totalProgram = 0;
     //Every other third position is a boost
-    for (var i = 0; i < gene.length - 3; i = i + 3) {
+    for (var i = 0; i < gene.length; i = i + 3) {
         //  console.log(`Gene ${i}: ${gene[i]}, ${gene[i + 1]}, ${gene[i + 2]}`);
         totalBoost = totalBoost + gene[i] * gene[i + 2];
         totalProgram = totalProgram + gene[i];
     }
-    //console.log(` totalBoost: ${totalBoost}, totalProgram: ${totalProgram}`);
+    //console.log(` totalBoost: ${totalBoost / SECONDS_IN_YEAR}, totalProgram: ${totalProgram}`);
     var avg = total / lastYearsDistance.length;
     var minDistance = Math.abs(min - 1.524 * AU) / (1.524 * AU);
     var maxDistance = Math.abs(max - 1.524 * AU) / (1.524 * AU);
-    var MAX_NEWTON_SECONDS = 100 * SECONDS_IN_YEAR;
+    var MAX_NEWTON_SECONDS = 1000000 * SECONDS_IN_YEAR;
     var boostDistance = totalBoost > MAX_NEWTON_SECONDS ? (totalBoost - MAX_NEWTON_SECONDS) / (MAX_NEWTON_SECONDS) : 0;
-    var programDistance = totalProgram > SECONDS_IN_YEAR * 2 ? (totalProgram - SECONDS_IN_YEAR * 2) / (SECONDS_IN_YEAR * 2) : 0;
+    var programDistance = totalProgram > SECONDS_IN_YEAR * 10 ? (totalProgram - SECONDS_IN_YEAR * 10) / (SECONDS_IN_YEAR * 10) : 0;
+    //console.log(`programDistance: ${totalProgram / SECONDS_IN_YEAR}`);
     // console.log(`minDistance: ${minDistance}, maxDistance: ${maxDistance}`);
-    return Math.sqrt(minDistance * minDistance + maxDistance * maxDistance + boostDistance * boostDistance * programDistance * programDistance);
+    return Math.sqrt(minDistance * minDistance + maxDistance * maxDistance + boostDistance * boostDistance + programDistance * programDistance);
     // const v = Math.sqrt(body.vx * body.vx + body.vy * body.vy);
     // return Math.abs(v - 24130);
 };
@@ -174,8 +175,8 @@ for (var i = 0; i < 200; i++) {
         var gene_1 = genes_1[_i];
         var thrustProgram = getThrustProgram(gene_1);
         var ship = { name: 'ship', x: -AU, y: 0, vx: 0, vy: -30000, mass: 1e6, color: 'white', thrust: 0, thrustProgram: thrustProgram };
-        var bodies = [__assign({}, sun), ship, __assign({}, mars),];
-        (0, orbital_1.simulate)(5 * SECONDS_IN_YEAR, bodies, 3600);
+        var bodies = [ship, __assign({}, sun), __assign({}, mars)];
+        (0, orbital_1.simulate)(1.5 * SECONDS_IN_YEAR, bodies, 3600);
         results.push({ gene: gene_1, distance: objectiveFunction(ship, gene_1) });
     }
     genes = breed(results);

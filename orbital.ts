@@ -27,6 +27,18 @@ const applyGravity = (body: CelestialBody, other: CelestialBody, steps: number, 
     const distance = Math.sqrt(dx * dx + dy * dy);
 
     const force = G * body.mass * other.mass / (distance * distance);
+
+
+
+    const ax = force * dx / distance / body.mass;
+    const ay = force * dy / distance / body.mass;
+
+    body.vx = body.vx + ax * timeStep;
+    body.vy = body.vy + ay * timeStep;
+
+};
+const applyThust = (body: CelestialBody, steps: number, timeStep: number) => {
+    // Calculate thrust
     let thax = 0;
     let thay = 0;
     if (body.thrustProgram) {
@@ -41,7 +53,6 @@ const applyGravity = (body: CelestialBody, other: CelestialBody, steps: number, 
             }
         }
         if (thrustP) {
-
             const thrustDirection = thrustP[1];
             const thrust = thrustP[2];
             const instDirection = Math.atan2(body.vy, body.vx);
@@ -51,15 +62,11 @@ const applyGravity = (body: CelestialBody, other: CelestialBody, steps: number, 
             const thrustY = thrust * Math.sin(thrustDirectionRad);
             thax = thrustX / body.mass;
             thay = thrustY / body.mass;
+            body.vx = body.vx + thax * timeStep;
+            body.vy = body.vy + thay * timeStep;
         }
+
     }
-
-
-    const ax = force * dx / distance / body.mass + thax;
-    const ay = force * dy / distance / body.mass + thay;
-
-    body.vx = body.vx + ax * timeStep;
-    body.vy = body.vy + ay * timeStep;
 
 };
 
@@ -71,7 +78,12 @@ const updateBodies = (bodies: CelestialBody[], steps: number, timeStep: number) 
                 applyGravity(body, otherBody, steps, timeStep);
             }
         };
+
+        if (body.thrustProgram !== undefined) {
+            applyThust(body, steps, timeStep);
+        }
     }
+
     for (let body of bodies) {
         body.x = body.x + body.vx * timeStep;
         body.y = body.y + body.vy * timeStep;

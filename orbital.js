@@ -12,6 +12,13 @@ var applyGravity = function (body, other, steps, timeStep) {
     var dy = other.y - body.y;
     var distance = Math.sqrt(dx * dx + dy * dy);
     var force = G * body.mass * other.mass / (distance * distance);
+    var ax = force * dx / distance / body.mass;
+    var ay = force * dy / distance / body.mass;
+    body.vx = body.vx + ax * timeStep;
+    body.vy = body.vy + ay * timeStep;
+};
+var applyThust = function (body, steps, timeStep) {
+    // Calculate thrust
     var thax = 0;
     var thay = 0;
     if (body.thrustProgram) {
@@ -34,12 +41,10 @@ var applyGravity = function (body, other, steps, timeStep) {
             var thrustY = thrust * Math.sin(thrustDirectionRad);
             thax = thrustX / body.mass;
             thay = thrustY / body.mass;
+            body.vx = body.vx + thax * timeStep;
+            body.vy = body.vy + thay * timeStep;
         }
     }
-    var ax = force * dx / distance / body.mass + thax;
-    var ay = force * dy / distance / body.mass + thay;
-    body.vx = body.vx + ax * timeStep;
-    body.vy = body.vy + ay * timeStep;
 };
 // Update positions and apply gravitational forces
 var updateBodies = function (bodies, steps, timeStep) {
@@ -52,6 +57,9 @@ var updateBodies = function (bodies, steps, timeStep) {
             }
         }
         ;
+        if (body.thrustProgram !== undefined) {
+            applyThust(body, steps, timeStep);
+        }
     }
     for (var _b = 0, bodies_3 = bodies; _b < bodies_3.length; _b++) {
         var body = bodies_3[_b];
