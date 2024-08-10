@@ -1,0 +1,12 @@
+{
+    "name": "orbital",
+    "version": "1.0.0",
+    "description": "Orbital Dynamics",
+    "main": "driverTest.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "dev": "tsc driverTest.ts && node driverTest.js"
+    },
+    "author": "",
+    "license": "ISC"
+}

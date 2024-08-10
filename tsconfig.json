@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+        "target": "esnext", // or "es6" or a later version
+        "lib": [
+            "es2019"
+        ], // include "dom" if you're working with browser APIs
+        "module": "commonjs",
+        "strict": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true
+    }
+}
