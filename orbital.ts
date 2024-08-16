@@ -17,6 +17,7 @@ export type CelestialBody = {
     avgSpeed?: number;
     avgDistance?: number;
     lastYearsDistance?: number[];
+    lastYearDistanceTarget?: number[];
     lastDistanceTime?: number;
     thrustProgram?: number[][];
 }
@@ -92,27 +93,19 @@ const updateBodies = (bodies: CelestialBody[], steps: number, timeStep: number) 
             if (body.lastYearsDistance === undefined) {
                 body.lastYearsDistance = [];
             }
+            if (body.lastYearDistanceTarget === undefined) {
+                body.lastYearDistanceTarget = [];
+            }
             body.lastYearsDistance.push(distanceFromSun(body));
             if (body.lastYearsDistance.length > 12) {
                 body.lastYearsDistance.shift();
             }
+            body.lastYearDistanceTarget.push(distanceFromTarget(body, bodies));
+            if (body.lastYearDistanceTarget.length > 12) {
+                body.lastYearDistanceTarget.shift();
+            }
         }
-        // if (steps % 100 === 0) {
-        //     const speed = Math.sqrt(body.vx * body.vx + body.vy * body.vy)
-        //     const distance = distanceFromSun(body);
-        //     // Calculate running average speed
 
-        //     if (body.avgSpeed === undefined) {
-        //         body.avgSpeed = speed;
-        //     } else {
-        //         body.avgSpeed = (body.avgSpeed * 0.99 + speed * 0.01);
-        //     }
-        //     if (body.avgDistance === undefined) {
-        //         body.avgDistance = distance;
-        //     } else {
-        //         body.avgDistance = (body.avgDistance * 0.99 + distance * 0.01);
-        //     }
-        // }
 
     }
 };
@@ -123,6 +116,12 @@ const AU = 1.496e11; // Astronomical Unit in meters
 const distanceFromSun = (body: CelestialBody): number => {
     return Math.sqrt(body.x * body.x + body.y * body.y);
 }
+var distanceFromTarget = function (body: CelestialBody, bodies: CelestialBody[]) {
+    const dx = body.x - bodies[2].x;
+    const dy = body.y - bodies[2].y;
+    return Math.sqrt(dx * dx + dy * dy);
+
+};
 // Main simulation loop
 export const simulate = (seconds: number, bodies: CelestialBody[], timeStep: number) => {
     let steps = 0;
@@ -130,6 +129,9 @@ export const simulate = (seconds: number, bodies: CelestialBody[], timeStep: num
     while (steps * timeStep < seconds) {
         steps++;
         updateBodies(bodies, steps, timeStep);
+        if (distanceFromSun(bodies[0]) > 10 * AU) {
+            break;
+        }
     }
 };
 
