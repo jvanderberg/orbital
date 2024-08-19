@@ -100,9 +100,9 @@ var simulate = function (seconds, bodies, timeStep) {
     while (steps * timeStep < seconds) {
         steps++;
         updateBodies(bodies, steps, timeStep);
-        if (distanceFromSun(bodies[0]) > 10 * AU) {
-            break;
-        }
+        // if (distanceFromSun(bodies[0]) > 10 * AU) {
+        //     break;
+        // }
     }
 };
 exports.simulate = simulate;

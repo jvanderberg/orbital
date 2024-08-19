@@ -2,7 +2,7 @@
 const canvas = document.getElementById('orbitalCanvas');
 const ctx = canvas.getContext('2d');
 const DUTY_CYCLE = 0.1;
-const MAX_THRUST = 500;
+const MAX_THRUST = 200;
 // Constants
 const G = 6.67430e-11; // Gravitational constant
 const AU = 1.496e11; // Astronomical Unit in meters
@@ -12,7 +12,7 @@ const skipTimeSteps = Math.floor(100000 / DT);
 const SECONDS_IN_YEAR = 31536000;
 const SECONDS_IN_DAY = 86400;
 let steps = 0;
-const initialGene = [0.19079408269252734, 0.9405381098342567, 0.8352957510924816, 0.39126956802702056, 0.040297820351389485, 0.8038600377018819, 0.3131683901682508, 0.04891807548151071, 0.7275696254946722, 0.5874301797102846, 0.7627218501447152, 0.05726630694070316, 0.0023457563134631834, 0.8720705488947835, 0.3442728511223042, 0.6325026557398179, 0.31202049950213756, 0.5694324683673668, 0.9252684111346382, 0.9838721753418302, 0.19315811836521576, 0.485835819677987, 0.9167195526645134, 0.2070281141160802, 0.127392223482888, 0.9421071205312627, 0.7302141928766276, 0.6499082745071267, 0.5222837429141591, 0.053743881329731714];
+const initialGene = [0.383964, 0, 0, 0.12300962214132607, 0.12101378154876138, 0.5496749637933072, 0.29171336854962376, 0.8037955672505628, 0.4217128896868013, 0.16605191625088947, 0.30818242691796305, 0.3496808280898503, 0.3379723401755871, 0.020577830824870563, 0.0005527808377004901, 0.40823469913233273, 0.028159325930123016, 0.8730573937450536, 0.23003645531349712, 0.014539726635089671, 0.01908477147783302, 0.11156969479757897, 0.9884400682810122, 0.1783389342382798, 0.39993926057519236, 0.9999524198385803, 0.5815829464181033, 0.4312312034028322, 0.636191440452341, 0.30960853194613736];
 const gene = initialGene;
 
 const getThrustProgram = (gene) => {
@@ -23,8 +23,12 @@ const getThrustProgram = (gene) => {
     // The thrust program is a list of genes
     const thrustProgram = [];
     for (let i = 0; i < gene.length; i += 3) {
-        thrustProgram.push([SECONDS_IN_YEAR * gene[i], 360 * gene[i + 1], (MAX_THRUST * gene[i + 2])]);
-        console.log(thrustProgram);
+        if (i > 0) {
+            thrustProgram.push([SECONDS_IN_YEAR * gene[i], 360 * gene[i + 1], gene[i + 2] > 0.5 ? MAX_THRUST : 0]);
+            console.log(thrustProgram);
+        } else {
+            thrustProgram.push([gene[0] * 5 * SECONDS_IN_YEAR, 0, 0]);
+        }
     }
     return thrustProgram;
 };
@@ -40,7 +44,7 @@ const earth = { name: 'earth', x: AU, y: 0, vx: 0, vy: 29783, mass: 5.972e24, co
 const venus = { name: 'venus', x: 0.723 * AU, y: 0, vx: 0, vy: 35020, mass: 4.87e24, color: 'green', thrust: 0 };
 const mars = { name: 'mars', x: 1.524 * AU, y: 0, vx: 0, vy: 24130, mass: 1, color: 'red', thrust: 0 };
 
-const something = { name: 'ship', x: -1 * AU, y: 0, vx: 0, vy: -20783, mass: 1e6, color: 'green', thrusting: false, thrust: 0, thrustProgram: thrustProgram };
+const something = { name: 'ship', x: -1 * AU, y: 0, vx: 0, vy: -29783, mass: 1e6, color: 'green', thrusting: false, thrust: 0, thrustProgram: thrustProgram };
 //const something2 = { x: 2.524 * AU, y: 0, vx: 0, vy: 19130, mass: 1e6, color: 'white', thrust: 20 };
 const jupiter = { x: 5.203 * AU, y: 0, vx: 0, vy: 13070, mass: 1.898e27, color: 'orange', thrust: 0 };
 const ceres = { x: 2.77 * AU, y: 0, vx: 0, vy: 17900, mass: 9.393e20, color: 'gray', thrust: 0 };

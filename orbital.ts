@@ -129,9 +129,9 @@ export const simulate = (seconds: number, bodies: CelestialBody[], timeStep: num
     while (steps * timeStep < seconds) {
         steps++;
         updateBodies(bodies, steps, timeStep);
-        if (distanceFromSun(bodies[0]) > 10 * AU) {
-            break;
-        }
+        // if (distanceFromSun(bodies[0]) > 10 * AU) {
+        //     break;
+        // }
     }
 };
 
