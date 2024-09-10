@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>Orbital Simulator</title>
+    <title>Orbital Simulator Solver</title>
     <style>
         canvas {
             background-color: #000;
@@ -14,14 +14,16 @@
             width: 100px;
             height: 20px;
         }
-    </style>
-    <script type="text/javascript">
-        function clearCanvas() {
-            let canvas = document.getElementById('orbitalCanvas');
-            const context = canvas.getContext('2d');
-            context.clearRect(0, 0, canvas.width, canvas.height);
+
+        #best {
+            height: 100px;
         }
+    </style>
+    <script type="module" src="script.ts">
+
     </script>
+
+
 </head>
 
 
@@ -30,11 +32,15 @@
         <button id="Clear" onclick="clearCanvas()">
             Clear
         </button>
+        <button id="Start" onclick="startRun()">
+            Start
+        </button>
         <span id="years"></span>
         <span id="velocity"></span>
     </div>
-    <canvas id="orbitalCanvas" width="800" height="800"></canvas>
-    <script type="module" src="orbitalSimulator"></script>
+    <div id="bestGene"></div>
+    <div id="step"></div>
+    <div id="bestRating"></div>
 
 </body>
 

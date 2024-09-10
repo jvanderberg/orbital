@@ -1,13 +1,30 @@
 {
     "compilerOptions": {
-        "target": "esnext", // or "es6" or a later version
+        "target": "ES2020",
+        "useDefineForClassFields": true,
+        "module": "ESNext",
         "lib": [
-            "es2019"
-        ], // include "dom" if you're working with browser APIs
-        "module": "commonjs",
-        "strict": true,
-        "esModuleInterop": true,
+            "ES2020",
+            "DOM",
+            "DOM.Iterable"
+        ],
         "skipLibCheck": true,
-        "forceConsistentCasingInFileNames": true
-    }
+        /* Bundler mode */
+        "moduleResolution": "bundler",
+        "allowImportingTsExtensions": true,
+        "isolatedModules": true,
+        "moduleDetection": "force",
+        "noEmit": true,
+        /* Linting */
+        "strict": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noFallthroughCasesInSwitch": true,
+        "types": [
+            "vite/client"
+        ]
+    },
+    "include": [
+        "src"
+    ]
 }
