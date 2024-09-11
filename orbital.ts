@@ -7,6 +7,7 @@ export const SECONDS_IN_YEAR = 31536000;
 export const SECONDS_IN_DAY = 86400;
 export const SECONDS_IN_MONTH = 2592000;
 export const MAX_THRUST = 200;
+export const DT = 3600; // Time step in seconds
 export type Thrust = [number, number, number];
 export type ThrustProgram = Thrust[];
 export type Gene = number[];
@@ -39,6 +40,7 @@ export const VENUS: CelestialBody = { name: 'venus', x: 0.723 * AU, y: 0, vx: 0,
 export const MARS: CelestialBody = { name: 'mars', x: 1.524 * AU, y: 0, vx: 0, vy: 24130, mass: 1, color: 'red', thrust: 0, thrustAngle: 0 };
 export const JUPITER: CelestialBody = { x: 5.203 * AU, y: 0, vx: 0, vy: 13070, mass: 1.898e27, color: 'orange', thrust: 0, thrustAngle: 0, name: 'jupiter' };
 export const CERES: CelestialBody = { x: 2.77 * AU, y: 0, vx: 0, vy: 17900, mass: 9.393e20, color: 'gray', thrust: 0, thrustAngle: 0, name: 'ceres' };
+export const SHIP = { name: 'ship', x: -AU, y: 0, vx: 0, vy: -29783, mass: 1e6, color: 'yellow', thrust: 0, thrustProgram: [], thrustAngle: 0 };
 
 export const applyGravity = (body: CelestialBody, other: CelestialBody, steps: number, timeStep: number) => {
     const dx = other.x - body.x;
@@ -164,19 +166,20 @@ var distanceFromTarget = function (body: CelestialBody, bodies: CelestialBody[])
 
 };
 // Main simulation loop
-export const simulate = (seconds: number, bodies: CelestialBody[], timeStep: number) => {
-    let steps = 0;
+export const simulate = (seconds: number, bodies: CelestialBody[], timeStep: number, steps: number = 0): number => {
+    let startStep = steps;
 
-    while (steps * timeStep < seconds) {
+    while ((steps - startStep) * timeStep < seconds) {
         steps++;
         updateBodies(bodies, steps, timeStep);
         if (distanceFromSun(bodies[0]) > 8 * AU) {
 
             // Exit the program if the ship is too far from the sun
-            process.exit();
+            return steps;
 
         }
     }
+    return steps;
 };
 
 
@@ -233,7 +236,7 @@ export const breed = ({ results, bestRating, bestGene1, lastRating, step, bestRe
     // }
     if (bestRating > 1e-6 && worseCount > 20) {
         //Entirely reset the simulation
-        throw new Error('Resetting simulation');
+        //throw new Error('Resetting simulation');
     }
 
     if (step === -1) {

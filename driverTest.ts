@@ -1,4 +1,4 @@
-import { AU, SECONDS_IN_YEAR, MAX_THRUST, CelestialBody, simulate, Gene, MARS, SUN, getThrustProgram, Result, BreedType, randomizeGene, breed } from "./orbital";
+import { AU, SECONDS_IN_YEAR, MAX_THRUST, CelestialBody, simulate, Gene, MARS, SUN, getThrustProgram, Result, BreedType, randomizeGene, breed, DT, SHIP } from "./orbital";
 const initialGene1: number[] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 const initialGene2: number[] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,];
 let bestGene1: Gene = initialGene1;
@@ -58,10 +58,10 @@ const objectiveFunction = (body: CelestialBody, gene: Gene) => {
     }
 
 
-    const minDistance = Math.abs(min - 1.524 * AU) / (1.524 * AU);
-    const maxDistance = Math.abs(max - 1.524 * AU) / (1.524 * AU);
-    const MAX_TRIP_TIME = 8 * SECONDS_IN_YEAR;
-    const MAX_NEWTON_SECONDS = 1000 * SECONDS_IN_YEAR;
+    const minDistance = Math.abs(min - 2.77 * AU) / (2.77 * AU);
+    const maxDistance = Math.abs(max - 2.77 * AU) / (2.77 * AU);
+    const MAX_TRIP_TIME = 3 * SECONDS_IN_YEAR;
+    const MAX_NEWTON_SECONDS = 400 * SECONDS_IN_YEAR;
     const boostDistance = totalBoost > MAX_NEWTON_SECONDS ? (totalBoost - MAX_NEWTON_SECONDS) / (MAX_NEWTON_SECONDS) : 0;
     const programDistance = (totalProgram > MAX_TRIP_TIME) ? ((MAX_TRIP_TIME - totalProgram) / (MAX_TRIP_TIME)) : 0;
     return Math.sqrt(minDistance * minDistance + maxDistance * maxDistance + boostDistance * boostDistance + programDistance * programDistance);
@@ -168,12 +168,14 @@ export function iterate(parms: BreedType) {
     console.log(`Best Gene 1: ${parms.bestGene1} `);
     results = [];
     for (let gene of parms.genes) {
-        const thrustProgram = getThrustProgram(gene.map(zeroThrust).concat(parms.bestGene1));
+        //const thrustProgram = getThrustProgram(gene.map(zeroThrust).concat(parms.bestGene1));
+        const thrustProgram = getThrustProgram(gene);
 
-        const ship = { name: 'ship', x: -AU, y: 0, vx: 0, vy: -29783, mass: 1e6, color: 'white', thrust: 0, thrustProgram, thrustAngle: 0 };
+        const ship = { ...SHIP, thrustProgram };
+
         let bodies: CelestialBody[] = [ship, { ...SUN }, { ...MARS }];
-        simulate(10 * SECONDS_IN_YEAR, bodies, 3600);
-        results.push({ gene, distance: objectiveFunction2(ship) });
+        simulate(10 * SECONDS_IN_YEAR, bodies, DT);
+        results.push({ gene, distance: objectiveFunction(ship, gene) });
         parms.results = results;
     }
     try {
