@@ -9,13 +9,11 @@ const ctx: CanvasRenderingContext2D | null = canvas.getContext('2d');
 const SCALE = 100 / AU; // Scale factor for drawing
 const DT = 3600; // Time step in seconds
 const skipTimeSteps = Math.floor(300000 / DT);
-const SECONDS_IN_DAY = 86400;
+
 let steps = 0;
-// const initialGene: Gene = [0.09530567616654266, 0, 0, 0.2395645288836077, 0, 0, 0.006935552975618892, 0, 0, 0.04322119952390119, 0, 0, 0.501136452090216, 0.003551658523728714, 0.5185935925429491, 0.05278547524934966, 0.9062280974199522, 0.676461815554625, 0.5750877606555509, 0.4096814894686363, 0.05900537099789856, 0.46938489181323984, 0.8113155965955294, 0.6624485321252126, 0.8113893524724478, 0.01586635563775942, 0.014495427327020615, 0.1576340944627103, 0.9846982918210953, 0.9306115381243135, 0.021146829562971998, 0.0029630841937146263, 0.4708054249335842, 0.00000395867648729266];
-// const gene: Gene = initialGene;
 
 let animationFrame: number;
-//const thrustProgram = getThrustProgram(gene);
+
 let running = false;
 
 
@@ -90,13 +88,11 @@ export const run = (seconds: number, bodies: CelestialBody[], step: number, step
         // Draw the bodies
         bodies.forEach(drawBody);
 
-        const years = document.getElementById('years');
+        const years = document.getElementById('years') as HTMLInputElement;
         const yrs = steps * DT / SECONDS_IN_YEAR;
         //format yrs to 2 decimal places
         if (years) {
-            years.innerHTML = Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(yrs);
-
-
+            years.value = Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(yrs);
         }
 
         // Request the next frame

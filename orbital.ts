@@ -241,20 +241,27 @@ export const breed = ({ results, bestRating, bestGene1, lastRating, step, bestRe
 
     if (step === -1) {
         step = bestRating / (Math.abs(variance));
-    } else {
+    } else if (worseCount < 20) {
 
         step = bestRating / (Math.abs(variance));
     }
     if (step > 1) {
         step = 1;
     }
-
     if (rating < bestRating || bestResults.length == 0) {
         bestResults = results;
         bestRating = rating;
     }
+    if (worseCount >= 30) {
+        step = 10;
+        worseCount = 0;
+        bestRating = 100;
+        bestResults = [];
+
+    }
+
+
     lastRating = rating;
-    console.log(`Step: ${step}, best: ${bestRating} rating: ${rating} worst: ${worseCount} `);
     const newGenes: Gene[] = [];
     for (let i = 0; i < 10; i++) {
 
@@ -271,8 +278,6 @@ export const breed = ({ results, bestRating, bestGene1, lastRating, step, bestRe
 
 
         }
-        console.log(` totalBoost: ${totalBoost / SECONDS_IN_YEAR}, totalProgram: ${totalProgram / SECONDS_IN_YEAR} `);
-
 
         for (let k = 1; k < 12; k++) {
 

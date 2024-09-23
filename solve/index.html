@@ -18,6 +18,64 @@
         #best {
             height: 100px;
         }
+
+        #buttons {
+            z-index: 15;
+            color: white;
+            position: relative;
+        }
+
+        #orbitalCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 10;
+        }
+
+        .displayValue {
+            border: none;
+            background-color: transparent;
+            font-family: inherit;
+            font-size: inherit;
+            text-align: left;
+            /* Or other alignment as needed */
+            cursor: default;
+            outline: none;
+            /* font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; */
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: 300;
+            color: rgb(72, 252, 72);
+            display: inline-block;
+            font-size: 12px;
+
+        }
+
+        .displayLabel {
+            width: 100px;
+            display: inline-block;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: 300;
+            color: rgb(72, 252, 72);
+            font-size: 12px;
+
+        }
+
+        #stats {
+            padding-left: 20px;
+            position: fixed;
+            background-color: transparent;
+            top: 50px;
+            left: 0;
+            z-index: 9999;
+            /* Ensure it's on top of other elements */
+            width: auto;
+            /* Set width as needed */
+            height: auto;
+
+            /* Optional styling */
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            /* Optional shadow for visibility */
+        }
     </style>
     <script type="module" src="script.ts">
 
@@ -28,7 +86,9 @@
 
 
 <body>
-    <div>
+    <canvas id="orbitalCanvas" width="800" height="800"></canvas>
+    <div id="buttons">
+
         <button id="Clear" onclick="clearCanvas()">
             Clear
         </button>
@@ -38,13 +98,33 @@
         <button id="Stop" onclick="stopRun()">
             Stop
         </button>
-        <span id="years"></span>
+
         <span id="velocity"></span>
     </div>
-    <input id="bestGene"></input>
-    <input id="step"></input>
-    <input id="bestRating"></input>
-    <canvas id="orbitalCanvas" width="800" height="800"></canvas>
+    <div id="stats">
+        <!-- <input class="displayValue" id="bestGene"></input> -->
+        <span class="displayLabel">Step</span>
+        <input class="displayValue" id="step"></input>
+        <br />
+        <span class="displayLabel">Best Rating</span>
+
+        <input class="displayValue" id="bestRating"></input>
+        <br />
+        <span class="displayLabel">Worst</span>
+        <input class="displayValue" id="worstCount"></input>
+        <br />
+        <span class="displayLabel">Years</span>
+        <input class="displayValue" id="years"></input>
+        <br />
+        <span class="displayLabel">Abs Best</span>
+        <input class="displayValue" id="absBest"></input>
+        <br />
+        <div style="display: flex; padding-top: 2px;">
+            <span class="displayLabel">Best Gene</span>
+            <textarea class="displayValue" style="width: 300px; padding-left: 6px" rows="3" id="bestGene"></textarea>
+        </div>
+    </div>
+
 </body>
 
 </html>

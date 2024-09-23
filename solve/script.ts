@@ -7,7 +7,26 @@ const WORKERS_COUNT = 8;
 const workers: Worker[] = [];
 let results: BreedType[] = [];
 let running: boolean = false;
+let bestRating = 100;
+let bestGene: Gene = [];
+function formatNumber(significantFigures: number) {
+    return function (value: number) {
+        if (typeof value !== 'number' || typeof significantFigures !== 'number') {
+            throw new TypeError('Both value and significantFigures should be numbers.');
+        }
 
+        // Check if exponential notation is necessary
+        const exponentNeeded = Math.abs(value) < 0.0001 || Math.abs(value) >= 1e7;
+
+        if (exponentNeeded) {
+            return value.toExponential(significantFigures - 1);
+        } else {
+            return Number(value.toPrecision(significantFigures)).toString();
+        }
+    }
+}
+
+const format3 = formatNumber(3);
 function initWorkers() {
     for (let i = 0; i < WORKERS_COUNT; i++) {
         let worker = new Worker(new URL('../driverTest.ts', import.meta.url), {
@@ -23,18 +42,34 @@ function initWorkers() {
                 parms2.results = allResults;
                 parms = parms2;
                 //  parms.step = -1;
-                const bestRating = window.document.getElementById('bestRating') as HTMLInputElement;
-                if (bestRating) {
-                    bestRating.value = parms.bestRating.toString();
+                const bestRatingElem = window.document.getElementById('bestRating') as HTMLInputElement;
+                if (bestRatingElem) {
+                    bestRatingElem.value = format3(parms.bestRating);
                 }
-                const bestGene = window.document.getElementById('bestGene') as HTMLInputElement;
-                if (bestGene) {
-                    bestGene.value = parms.results[0].gene.toString();
-                }
+
                 const step = window.document.getElementById('step') as HTMLInputElement;
                 if (step) {
-                    step.value = parms.step.toString();
+                    step.value = format3(parms.step);
                 }
+                const worstCount = window.document.getElementById('worstCount') as HTMLInputElement;
+                if (worstCount) {
+                    worstCount.value = parms.worseCount.toString();
+                }
+
+                if (parms.bestRating < bestRating) {
+                    bestRating = parms.bestRating;
+                    bestGene = parms.bestResults[0].gene;
+                    const absBestElem = window.document.getElementById('absBest') as HTMLInputElement;
+                    if (absBestElem) {
+                        absBestElem.value = format3(bestRating);
+                    }
+                    const bestGeneElem = window.document.getElementById('bestGene') as HTMLInputElement;
+                    if (bestGeneElem) {
+                        bestGeneElem.value = bestGene.map(format3).toString();
+                    }
+
+                }
+
                 parms = breed(parms);
                 if (running) {
                     run();
@@ -57,6 +92,7 @@ declare global {
 }
 const initialGene2: number[] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,];
 const initialGene1: number[] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
 let genes: Gene[] = [];
 for (let i = 0; i < 120; i++) {
     genes.push(randomizeGene(initialGene1, 1));
@@ -94,7 +130,7 @@ window.startRun = () => {
             const thrustProgram = getThrustProgram(bestGene);
 
             const ship = { ...SHIP, thrustProgram };
-            let bodies: CelestialBody[] = [ship, { ...SUN }, { ...MARS }, { ...CERES }];
+            let bodies: CelestialBody[] = [ship, { ...SUN }, { ...CERES }];
             startSimulation(5 * SECONDS_IN_YEAR, bodies, DT);
         }
 

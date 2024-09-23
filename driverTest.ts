@@ -60,11 +60,12 @@ const objectiveFunction = (body: CelestialBody, gene: Gene) => {
 
     const minDistance = Math.abs(min - 2.77 * AU) / (2.77 * AU);
     const maxDistance = Math.abs(max - 2.77 * AU) / (2.77 * AU);
-    const MAX_TRIP_TIME = 3 * SECONDS_IN_YEAR;
-    const MAX_NEWTON_SECONDS = 400 * SECONDS_IN_YEAR;
+    const MAX_TRIP_TIME = 10 * SECONDS_IN_YEAR;
+    const MAX_NEWTON_SECONDS = 1000 * SECONDS_IN_YEAR;
     const boostDistance = totalBoost > MAX_NEWTON_SECONDS ? (totalBoost - MAX_NEWTON_SECONDS) / (MAX_NEWTON_SECONDS) : 0;
     const programDistance = (totalProgram > MAX_TRIP_TIME) ? ((MAX_TRIP_TIME - totalProgram) / (MAX_TRIP_TIME)) : 0;
-    return Math.sqrt(minDistance * minDistance + maxDistance * maxDistance + boostDistance * boostDistance + programDistance * programDistance);
+    const targetDistance = objectiveFunction2(body) / 50;
+    return Math.sqrt(targetDistance * targetDistance + minDistance * minDistance + maxDistance * maxDistance + boostDistance * boostDistance + programDistance * programDistance);
 }
 
 const objectiveFunction2 = (body: CelestialBody) => {
@@ -165,7 +166,6 @@ self.onmessage = function (event: MessageEvent) {
 export function iterate(parms: BreedType) {
     // Main simulation loop
 
-    console.log(`Best Gene 1: ${parms.bestGene1} `);
     results = [];
     for (let gene of parms.genes) {
         //const thrustProgram = getThrustProgram(gene.map(zeroThrust).concat(parms.bestGene1));
