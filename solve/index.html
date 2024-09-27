@@ -4,6 +4,13 @@
 <head>
     <title>Orbital Simulator Solver</title>
     <style>
+        body {
+            margin: 0px;
+            width: 100%;
+            height: 100%;
+
+        }
+
         canvas {
             background-color: #000;
             display: block;
@@ -30,6 +37,7 @@
             top: 0;
             left: 0;
             z-index: 10;
+
         }
 
         .displayValue {
@@ -80,13 +88,19 @@
     <script type="module" src="script.ts">
 
     </script>
-
+    <script>
+        function resize() {
+            const canvas = document.getElementById('orbitalCanvas');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+    </script>
 
 </head>
 
 
-<body>
-    <canvas id="orbitalCanvas" width="800" height="800"></canvas>
+<body onresize="resize()" onload="resize()">
+    <canvas id="orbitalCanvas"></canvas>
     <div id="buttons">
 
         <button id="Clear" onclick="clearCanvas()">

@@ -144,3 +144,6 @@ window.stopRun = () => {
     parms = { genes, results: [], bestGene1: bestGeneFromFirstIteration, bestRating: 100, lastRating: 100, step: 1, bestResults: [] as Result[], worseCount: 0, history: [] as number[] };
 
 }
+window.onbeforeunload = () => {
+    workers.forEach(worker => worker.terminate());
+}

@@ -49,8 +49,8 @@ const objectiveFunction = (body: CelestialBody, gene: Gene) => {
         total = total + lastYearsDistance[i];
     }
 
-    let totalBoost = 0;
-    let totalProgram = 0
+    let totalBoost: number = 0;
+    let totalProgram: number = 0
 
     for (let i = 1; i < gene.length; i = i + 3) {
         totalBoost = totalBoost + SECONDS_IN_YEAR * gene[i] * ((gene[i + 2] > 0.5) ? MAX_THRUST : 0);
@@ -60,12 +60,13 @@ const objectiveFunction = (body: CelestialBody, gene: Gene) => {
 
     const minDistance = Math.abs(min - 2.77 * AU) / (2.77 * AU);
     const maxDistance = Math.abs(max - 2.77 * AU) / (2.77 * AU);
-    const MAX_TRIP_TIME = 10 * SECONDS_IN_YEAR;
+    const MAX_TRIP_TIME = 3.5 * SECONDS_IN_YEAR;
     const MAX_NEWTON_SECONDS = 1000 * SECONDS_IN_YEAR;
     const boostDistance = totalBoost > MAX_NEWTON_SECONDS ? (totalBoost - MAX_NEWTON_SECONDS) / (MAX_NEWTON_SECONDS) : 0;
-    const programDistance = (totalProgram > MAX_TRIP_TIME) ? ((MAX_TRIP_TIME - totalProgram) / (MAX_TRIP_TIME)) : 0;
-    const targetDistance = objectiveFunction2(body) / 50;
-    return Math.sqrt(targetDistance * targetDistance + minDistance * minDistance + maxDistance * maxDistance + boostDistance * boostDistance + programDistance * programDistance);
+    const programDistance = 10 * ((totalProgram > MAX_TRIP_TIME) ? ((MAX_TRIP_TIME - totalProgram) / (MAX_TRIP_TIME)) : 0);
+    const targetDistance = objectiveFunction2(body);
+    //return Math.sqrt(targetDistance * targetDistance);
+    return Math.sqrt(minDistance * minDistance + maxDistance * maxDistance + boostDistance * boostDistance + programDistance * programDistance);
 }
 
 const objectiveFunction2 = (body: CelestialBody) => {
@@ -84,8 +85,8 @@ const objectiveFunction2 = (body: CelestialBody) => {
         }
     }
 
-    const minTargetDistance = Math.abs(minTarget - maxTarget) / AU;
-    const maxTargetDistance = Math.abs(maxTarget) / AU;
+    const minTargetDistance = Math.log(Math.abs((minTarget - 1e6)) / 1e6) / 100;
+    const maxTargetDistance = Math.log(Math.abs((maxTarget - 1e6)) / 1e6) / 100;
     //return minTargetDistance;
     return Math.sqrt(minTargetDistance * minTargetDistance + maxTargetDistance * maxTargetDistance);
 }

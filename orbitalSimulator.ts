@@ -16,16 +16,11 @@ let animationFrame: number;
 
 let running = false;
 
-
-
-// const something: CelestialBody = { name: 'ship', x: -1 * AU, y: 0, vx: 0, vy: -29783, mass: 1e6, color: 'green', thrusting: false, thrust: 0, thrustProgram: thrustProgram, thrustAngle: 0 };
-
-// let bodies: CelestialBody[] = [something, SUN, EARTH, MARS, CERES];
-
 export const objectiveFunction = (body: CelestialBody) => {
     const v = Math.sqrt(body.vx * body.vx + body.vy * body.vy);
     return Math.abs(v - 24130);
 }
+
 // Update position based on velocity
 const updatePosition = (body: CelestialBody) => {
     body.x = body.x + body.vx * DT;
@@ -38,8 +33,9 @@ const drawBody = (body: CelestialBody) => {
 
     if (ctx) {
         ctx.beginPath();
-
+        const SCALE = canvas.width / 10 / AU;
         if (body.thrusting) {
+
             ctx.beginPath();  // Begin the path first
             ctx.moveTo(body.x * SCALE + canvas.width / 2, body.y * SCALE + canvas.height / 2);
             ctx.strokeStyle = `hsl(${360 * body.thrust / MAX_THRUST}, 100%, 50%)`;
